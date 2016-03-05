@@ -74,7 +74,7 @@ proto_compile(AppInfo, ProtoFiles) ->
     case protobuffs_is_present() of
         true ->
             %% Build a list of output files - { Proto, Beam, Hrl }
-            Targets = [{Proto, beam_file(Proto), hrl_file(Proto)} ||
+            Targets = [{Proto, hrl_file(Proto)} ||
                           Proto <- ProtoFiles],
 
             %% Compile each proto file
