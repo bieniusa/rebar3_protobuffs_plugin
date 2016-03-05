@@ -88,31 +88,24 @@ proto_compile(AppInfo, ProtoFiles) ->
 protobuffs_is_present() ->
     code:which(protobuffs_compile) =/= non_existing.
 
-beam_file(Proto) ->
-    filename:basename(Proto, ".proto") ++ "_pb.beam".
-
 hrl_file(Proto) ->
     filename:basename(Proto, ".proto") ++ "_pb.hrl".
 
-needs_compile(HomeDir, Proto, Beam) ->
-    ActualBeam = filename:join([HomeDir, "ebin", filename:basename(Beam)]),
-    ProtoFile = filename:join([HomeDir, "src", Proto]),
-    filelib:last_modified(ActualBeam) < filelib:last_modified(ProtoFile).
+needs_compile(HomeDir, Proto) ->
+  true.
 
 compile_each(_, []) ->
     ok;
-compile_each(AppInfo, [{Proto, Beam, Hrl} | Rest]) ->
+compile_each(AppInfo, [{Proto, Hrl} | Rest]) ->
     AppHome = rebar_app_info:out_dir(AppInfo),
-    case needs_compile(AppHome, Proto, Beam) of
+    case needs_compile(AppHome, Proto) of
         true ->
             rebar_api:console("Compiling ~s", [Proto]),
             ErlOpts = rebar_opts:erl_opts(rebar_app_info:opts(AppInfo)),
-            ok = filelib:ensure_dir(filename:join([AppHome, "ebin","dummy"])),
             ok = filelib:ensure_dir(filename:join([AppHome, "include", Hrl])),
             case catch(protobuffs_compile:scan_file(Proto,
                                               [{compile_flags, ErlOpts},
                                                {imports_dir, [filename:join(AppHome, "src")]},
-                                               {output_ebin_dir, [filename:join(AppHome, "ebin")]},
                                                {output_include_dir, [filename:join(AppHome, "include")]}
                                               ])) of
                 ok ->
